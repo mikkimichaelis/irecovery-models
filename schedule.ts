@@ -1,24 +1,25 @@
 import { DateTime } from 'luxon';
-import { Meeting, VerifiedStatus } from './meeting';
-import { RecurrenceType } from './recurrence';
+import Realm, { ObjectSchema } from 'realm';
+import { Meeting } from './meeting';
 
-export interface ISchedule {
-    hash: string;                       // computed hash of meeting details used to detect updates
-    updated: number;                    // last time meeting was updated or imported or created
-    active: boolean;                    // is active?
-    authorized: boolean;                // is authorized?  not sure what this was intended for
+export class Schedule extends Realm.Object<Schedule> {
+    static schema: ObjectSchema = {
+        name: 'Schedule',
+        primaryKey: '_id',
+        properties: {
+            _id: { type: "objectId", default: () => new Realm.BSON.ObjectId() },
+            updated: 'int',
+            active: 'bool',
+            authorized: 'bool',
+            daily: 'bool',
+            name: 'string',
+            meetings: 'Meeting[]',
+        },
+    }
 
-    daily: boolean;                     // is this a daily meeting?
-    name: string;                       // name of the meeting
-    mids: string[];                     // meeting ids belonging to this schedule (ordered by string compare)
-
-    update(): ISchedule;                // update the schedule and compute hash
-    addMeetings(meetings: Meeting[]): ISchedule;
-}
-
-export class Schedule implements ISchedule {
-    hash: string = '';
-    updated: number = DateTime.now().toMillis();
+    _id!: Realm.BSON.ObjectId;
+    
+    updated: number = 0;
     active: boolean = true;
     authorized: boolean = true;
 
@@ -26,44 +27,34 @@ export class Schedule implements ISchedule {
     name: string = '';
     mids: string[] = [];
 
-    constructor(schedule?: any) {
-    }
-
     public static sortMeetingsByStartTime(meetings: Meeting[]): Meeting[] {
         return meetings.sort((a, b) => {
-            if (a.recurrence?.type === RecurrenceType.CONTINUOUS) {
-                return b.recurrence?.type === RecurrenceType.CONTINUOUS ? 0 : -1;
+            if (a.continuous) {
+                return b.continuous ? 0 : -1;
             }
-            else if (b.recurrence?.type === RecurrenceType.CONTINUOUS) return 1;
+            else if (b.continuous) return 1;
 
-            // compare by startTime
-            if (a.recurrence?.type === RecurrenceType.DAILY) {
-                if (a.startTime < b.startTime) return -1;
-                if (a.startTime > b.startTime) return 1;
-            }
+            if (a.startDateTime < b.startDateTime) return -1;
+            if (a.startDateTime > b.startDateTime) return 1;
 
-            // compare by startDateTime
-            if (a.recurrence?.type === RecurrenceType.WEEKLY) {
-                if (a.startDateTime < b.startDateTime) return -1;
-                if (a.startDateTime > b.startDateTime) return 1;
-            }
             return 0;   // a == b
         });
     }
 
-    addMeetings(meetings: Meeting[]): ISchedule {
-        this.mids = this.mids.concat(meetings.map(m => m.id));
+    addMeetings(meetings: Meeting[]) {
+        this.mids = this.mids.concat(meetings.map(m => m._id.toString()));
 
+        this.daily = false;
         while (meetings.length > 6) {
             // try to extract meetings per DOW with the same name and time as a Daily Meeting
             const weekdays = Meeting.weekdays.map(day => {
                 return meetings.find(sibling =>
                     sibling.time24h === meetings[0].time24h
                     && sibling.name === meetings[0].name
-                    && sibling.recurrence?.weekly_day === day);
+                    && sibling.dayOfWeek === day);
             }).filter((sibling: any) => sibling);
 
-            // if we have 7 siblings at the same time, make them a single Daily Meeting
+            // if we have 7 siblings at the same time, make this a daily schedule
             if (weekdays.length === 7) {
                 this.daily = true;
                 meetings = meetings.filter(m => !weekdays.includes(m));
@@ -71,53 +62,12 @@ export class Schedule implements ISchedule {
                 meetings = meetings.slice(1);
             }
         }
-
-        return this;
-    }
-
-    public update(): ISchedule {
-        this.updated = DateTime.now().toMillis();       // set new updated (exclude from hash)
-
-        // sort mids by simple string compare
-        this.mids = this.mids.sort((a: string, b: string) => {
-            if (a < b) return -1;
-            if (a > b) return 1;
-            return 0;
-        });
-
-        const hash = this.computeHash();                // compute hash
-        if (hash !== this.hash) {                       // has anything changed?
-            this.hash = hash;
-        }
-        return this;
-    }
-
-    toObject() {
-        const exclude = [];
-    }
-
-    toJSON() {
-    }
-
-    public computeHash(): string {
-        // note ${this.updated} is excluded from the hash because it is updated every time the hash is computed
-        let str = `${this.active}${this.authorized}${this.name}${this.mids.toString()}`;
-
-        // https://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript
-        var hash = 0,
-            i, chr;
-        for (i = 0; i < str.length; i++) {
-            chr = str.charCodeAt(i);
-            hash = ((hash << 5) - hash) + chr;
-            hash |= 0; // Convert to 32bit integer
-        }
-        return `${hash}`;
     }
 }
 
 
 //////////////////////////////////////////////////////////////////////////////////////////
-/*  This is the original Schedule class from the AANA project.  It is not used in the
+/*  This is the first Schedule class from the AANA project.  It is not used in the
     current project, but is included here for reference and nostalgia.
 //////////////////////////////////////////////////////////////////////////////////////////
 export interface IZoomSchedule extends ISchedule {

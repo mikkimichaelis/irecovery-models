@@ -2,7 +2,7 @@ import { head, last } from 'lodash';
 import { DateTime, Duration } from 'luxon';
 import { v4 as uuidv4 } from 'uuid';
 import { IUser } from './user.class';
-import { IMeeting } from './meeting';
+import { Meeting } from './meeting';
 export interface IAttendanceRecord {
     aid: string;
 
@@ -92,7 +92,7 @@ export interface IAttendance {
     updated: number; _updated$: string;             // server utc millis last updated
 
     user: IUser;            // [attached] Copies of user and meeting data at time of attendance
-    meeting: IMeeting;      // [attached] Set server side when processed
+    meeting: Meeting;      // [attached] Set server side when processed
     records: IAttendanceRecord[];   // [attached]
 
     invalid: boolean;   // added to invalidate invalid records (missing meetings)
@@ -100,7 +100,7 @@ export interface IAttendance {
 
     isValid(): Promise<boolean>;
     repair(): Promise<IAttendance>
-    update(meeting?: IMeeting): void;
+    update(meeting?: Meeting): void;
     process(): Promise<boolean>;
 }
 export class Attendance implements IAttendance {
@@ -142,7 +142,7 @@ export class Attendance implements IAttendance {
 
     // EXCLUDED!
     user: IUser = <any>null;
-    meeting: IMeeting = <any>null;
+    meeting: Meeting = <any>null;
     records: IAttendanceRecord[] = [];
 
     invalid = false;
@@ -157,7 +157,7 @@ export class Attendance implements IAttendance {
         const exclude: string[] = ['user', 'meeting', 'records', 'reentry'];
     }
 
-    public update(meeting?: IMeeting) {
+    public update(meeting?: Meeting) {
         if (this.start > 0) this.__start$ = DateTime.fromMillis(this.start).setZone(<any>this._timezone).toFormat('FFF');
         if (this.end > 0) this.__end$ = DateTime.fromMillis(this.end).setZone(<any>this._timezone).toFormat('FFF');
         if (this.produced > 0) this.__produced$ = DateTime.fromMillis(this.produced).setZone(<any>this._timezone).toFormat('FFF');
@@ -172,7 +172,6 @@ export class Attendance implements IAttendance {
 
         if (meeting) {
             this._meetingName$ = meeting.name;
-            this._meetingStartTime$ = meeting.startTime$;
             this._meetingDuration$ = meeting.continuous ? 'Continuous' : Duration.fromObject({ minutes: meeting.duration }).toFormat('hh:mm:ss');
         }
 

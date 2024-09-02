@@ -1,7 +1,7 @@
 import { DateTime, Duration } from 'luxon';
-import { IMeeting } from './meeting';
 import { IUserRating, UserRatingStatus } from './user-rating';
 import { IUserBase, UserBase } from './userBase.class';
+import { Meeting } from './meeting';
 
 export enum UserAuthorizationEnum {
     NONE = 0,
@@ -189,7 +189,7 @@ export interface IUserStats {
 
     appRun(): void;
     appRatingPrompt(rating: IUserRating): void;
-    meetingCount(meeting: IMeeting): void;
+    meetingCount(meeting: Meeting): void;
     process(): void;
 }
 export interface IUser extends IUserBase {
@@ -410,7 +410,7 @@ export class UserStats implements IUserStats {
         if (rating.feedback) this.rating_feedback = this.rating_feedback + 1;
     }
 
-    meetingCount(meeting: IMeeting) {
+    meetingCount(meeting: Meeting) {
         this.timestamp = DateTime.now().toMillis();
         this.rating_events = this.rating_events + 1;
         this.meeting_last = DateTime.now().toMillis();

@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon';
-import { IMeeting } from './meeting';
 import { IAttendance } from './attendance';
+import { Meeting } from './meeting';
 export interface IAttendanceReport {
     uid: string;
     version: number;
@@ -42,7 +42,7 @@ export class AttendanceReport implements IAttendanceReport {
     attendances: string[] = [];
 
     // now we keep every thing orderly.
-    meetings: IMeeting[] = [];      // copies of all meetings as existed when reported
+    meetings: Meeting[] = [];      // copies of all meetings as existed when reported
     attendance: IAttendance[] = []; // copies of all attendance as existed when reported
 
     email: string = <any>null;

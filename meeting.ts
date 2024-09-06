@@ -1,10 +1,9 @@
 var CryptoJS = require("crypto-js");
-import { cloneDeep, isEmpty, isNil, join } from 'lodash';
+import { isEmpty, isNil, join } from 'lodash';
 import { DateTime } from 'luxon';
 import { ObjectSchema, Realm } from 'realm';
-import { Recurrence, RecurrenceType } from './recurrence';
-import { SpecificDay } from './search-settings';
 import { Schedule } from './schedule';
+import { SpecificDay } from './search-settings';
 
 export enum VerifiedStatus {
     // ordering here is important as it's used for sorting in api->getNextMeetingVerification()
@@ -59,7 +58,7 @@ export class Meeting extends Realm.Object<Meeting> {
         }
     };
 
-    _id!: Realm.BSON.ObjectId;
+    _id: Realm.BSON.ObjectId = new Realm.BSON.ObjectId();
     schedule?: Realm.Collection<Schedule>;
 
     /*
@@ -100,7 +99,7 @@ export class Meeting extends Realm.Object<Meeting> {
 
     description: string = '';
 
-    tags: string[] = [];
+    tags: string[] = ['tits'];
 
     timezone: string = 'America/New_York';
     time24h: string = '00:00';

@@ -46,6 +46,7 @@ export class Meeting extends Realm.Object<Meeting> {
             location: 'string?',
             groupType: 'string',
             meetingTypes: 'string[]',
+            name: 'string',
             description: 'string?',
             tags: 'string[]',
             continuous: 'bool',
@@ -53,8 +54,8 @@ export class Meeting extends Realm.Object<Meeting> {
             time24h: 'string',
             dayOfWeek: 'string?',
             duration: 'int',
-            startDateTime: 'int',
-            endDateTime: 'int'
+            startDateTime: {type: 'int', indexed: true},
+            endDateTime: {type: 'int', indexed: true}
         }
     };
 

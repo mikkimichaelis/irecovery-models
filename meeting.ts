@@ -573,7 +573,7 @@ export class Meeting extends Realm.Object<Meeting> {
             // @ts-ignore
             let day: any = iso_weekday
                 ? iso_weekday
-                : Meeting.iso_weekday_2_70s_dow[dt.weekdayLong];
+                : Meeting.iso_weekday_2_70s_dow[dt.weekdayLong!];
 
             let dateTime = DateTime.fromObject(
                 {

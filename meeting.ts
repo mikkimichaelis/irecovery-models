@@ -1,9 +1,9 @@
-var CryptoJS = require("crypto-js");
 import { isEmpty, isNil, join } from 'lodash';
 import { DateTime } from 'luxon';
 import { ObjectSchema, Realm } from 'realm';
 import { Schedule } from './schedule';
 import { SpecificDay } from './search-settings';
+const CryptoJS = require("crypto-js");
 
 export enum VerifiedStatus {
     // ordering here is important as it's used for sorting in api->getNextMeetingVerification()
@@ -25,7 +25,7 @@ export class Meeting extends Realm.Object<Meeting> {
                 type: "linkingObjects",
                 objectType: "Schedule",
                 property: "meetings",
-              },
+            },
             hash: 'string',
             updated: 'int',
             active: 'bool',
@@ -49,12 +49,13 @@ export class Meeting extends Realm.Object<Meeting> {
             description: 'string?',
             tags: 'string[]',
             continuous: 'bool',
+            // recurring: 'bool',
             timezone: 'string',
             time24h: 'string',
             dayOfWeek: 'string?',
             duration: 'int',
-            startDateTime: {type: 'int', indexed: true},
-            endDateTime: {type: 'int', indexed: true}
+            startDateTime: { type: 'int', indexed: true },
+            endDateTime: { type: 'int', indexed: true }
         }
     };
 
@@ -70,49 +71,49 @@ export class Meeting extends Realm.Object<Meeting> {
           a locally updated meeting to retain the same hash as an unchanged imported meeting,
           skipping update altogether.
       */
-    hash: string = '';
+    hash = '';
 
-    active: boolean = true;
-    authorized: boolean = true;
+    active = true;
+    authorized = true;
 
     verified = false;
     verified_status = VerifiedStatus.NONE;
     verified_date = -1;
 
-    meetingUrl: string = '';
+    meetingUrl = '';
 
-    zid: string = '';
-    password: string = '';
-    _passwordEnc: string = '';
-    requiresLogin: boolean = false;
-    closed: boolean = false;
-    restricted: boolean = false;
-    restrictedDescription: string = '';
+    zid = '';
+    password = '';
+    _passwordEnc = '';
+    requiresLogin = false;
+    closed = false;
+    restricted = false;
+    restrictedDescription = '';
 
-    language: string = 'en';
-    location: string = '';
+    language = 'en';
+    location = '';
 
-    name: string = '';
+    name = '';
 
-    groupType: string = '';
+    groupType = '';
     meetingTypes: string[] = [];
 
-    description: string = '';
+    description = '';
 
     tags: string[] = ['tits'];
 
-    timezone: string = 'America/New_York';
-    time24h: string = '00:00';
-    dayOfWeek: string = '';
-    duration: number = 60;
-    continuous: boolean = false;
+    timezone = 'America/New_York';
+    time24h = '00:00';
+    dayOfWeek = '';
+    duration = 60;
+    continuous = false;
 
     // startDateTime is a point in time this meeting starts which can be searched for within a window of time
     // this is used to search for meetings within a specific day
-    startDateTime: number = -1; // Absolute start DateTime in UTC of Meeting startTime + weekday in Meeting timezone
-    endDateTime: number = -1;
+    startDateTime = -1; // Absolute start DateTime in UTC of Meeting startTime + weekday in Meeting timezone
+    endDateTime = -1;
 
-    updated: number = 0;
+    updated = 0;
 
     // - Mills till isLive ends
     // + Mills till isLive starts
@@ -235,7 +236,7 @@ export class Meeting extends Realm.Object<Meeting> {
     get nextTime(): DateTime {
         if (isNil(this._nextTime)) {
             // Weekly meetings use startDateTime to compare with now
-            const now = Meeting.makeThat70sDateTime() as any;
+            // const now = Meeting.makeThat70sDateTime() as any;
             const startDateTime = DateTime.fromMillis(this.startDateTime);
 
             let next = DateTime.now().set({
@@ -298,12 +299,12 @@ export class Meeting extends Realm.Object<Meeting> {
     // }
 
     public computeHash(): string {
-        let input = `${this.meetingTypes.join()}${this.meetingUrl}${this.name}${this.description}
+        const input = `${this.meetingTypes.join()}${this.meetingUrl}${this.name}${this.description}
             ${this.password}${this._passwordEnc}${this.language}${this.location}${this.duration}
             ${this.time24h}${this.timezone}${this.closed}${this.restricted}${this.restrictedDescription}
             ${this.requiresLogin}${this.tags}${this.continuous}${this.zid}`;
 
-            return CryptoJS.MD5(input).toString();
+        return CryptoJS.MD5(input).toString();
     }
 
     public setVerification(status: string) {
@@ -359,6 +360,7 @@ export class Meeting extends Realm.Object<Meeting> {
     }
 
     public isLiveAt(dateTime: DateTime): boolean {
+        // TODO Review (seems wacky)
         dateTime = Meeting.makeThat70sTime(dateTime); // put required local time: dateTime into That70sTime
         let isLive = false;
         const _dateTime = Meeting.makeThat70sDateTime(dateTime).toMillis();
@@ -428,10 +430,11 @@ export class Meeting extends Realm.Object<Meeting> {
         'Saturday',
         'Sunday',
     ];
+
     // static iso_weekday_2_iso_index(weekday: any) { return Meeting.weekdays.indexOf(weekday) + 1 }
     static oneDayMillis = 86400000; // 24 * 60 * 60 * 1000
     static oneWeekMillis = 7 * Meeting.oneDayMillis;
-    static time12to24h = (time12) =>
+    static time12to24h = (time12: any) =>
         new Date(`1970-01-01 ${time12}`)
             .toLocaleTimeString('en-US', { hour12: false })
             .substring(0, 5);
@@ -439,7 +442,7 @@ export class Meeting extends Realm.Object<Meeting> {
     // this function takes a starting millis and a frequency.
     // The mills for with the next frequency will happen is calculated
     //
-    static getNextFrequency = (fromWhen, frequency): number => {
+    static getNextFrequency = (fromWhen: number, frequency: number): number => {
         // mark 1 would be every minute.  5 ever 5m and so on.
 
         let next = DateTime.fromMillis(fromWhen)
@@ -453,7 +456,7 @@ export class Meeting extends Realm.Object<Meeting> {
         return next.toMillis();
     };
 
-    public activate(activate): void {
+    public activate(activate: boolean): void {
         this.active = activate;
         this.updated = DateTime.now().toMillis();
     }
@@ -531,7 +534,7 @@ export class Meeting extends Realm.Object<Meeting> {
         timezone?: string,
         utc?: boolean
     ): DateTime {
-        time = time ? time : DateTime.local();
+        time = time || DateTime.local();
         if (!isNil(time)) {
             switch (typeof time) {
                 case 'string': // 'hh:mm' or ISO string
@@ -551,12 +554,11 @@ export class Meeting extends Realm.Object<Meeting> {
                 case 'object':
                     time = Meeting.makeThat70sDateTime(
                         time,
-                        Meeting.iso_weekday_2_70s_dow['Thursday'],
+                        Meeting.iso_weekday_2_70s_dow.Thursday,
                         utc
                     );
                     break;
                 default:
-                    debugger;
             }
         }
         return time;
@@ -564,36 +566,30 @@ export class Meeting extends Realm.Object<Meeting> {
 
     static makeThat70sDateTime(
         dateTime?: DateTime,
-        iso_weekday?: any,
+        isoWeekday?: number,
         utc?: boolean
     ): DateTime {
-        let dt = isNil(dateTime) ? DateTime.local() : dateTime;
+        const dt = isNil(dateTime) ? DateTime.local() : dateTime;
 
-        try {
-            // @ts-ignore
-            let day: any = iso_weekday
-                ? iso_weekday
-                : Meeting.iso_weekday_2_70s_dow[dt.weekdayLong!];
+        // @ts-ignore
+        const day: any = isoWeekday || Meeting.iso_weekday_2_70s_dow[dt.weekday.toString()];
 
-            let dateTime = DateTime.fromObject(
-                {
-                    hour: dt.hour ? dt.hour : 0,
-                    minute: dt.minute ? dt.minute : 0,
-                    second: 0,
-                    millisecond: 0,
-                },
-                { zone: dt.zoneName ? dt.zoneName : 'local' }
-            ).set({
-                year: 1970,
-                month: 1,
-                day,
-            });
+        let _dateTime = DateTime.fromObject(
+            {
+                hour: dt.hour ? dt.hour : 0,
+                minute: dt.minute ? dt.minute : 0,
+                second: 0,
+                millisecond: 0,
+            },
+            { zone: dt.zoneName ? dt.zoneName : 'local' }
+        ).set({
+            year: 1970,
+            month: 1,
+            day,
+        });
 
-            if (utc) dateTime = dateTime.setZone('UTC');
-            return dateTime;
-        } catch (error) {
-            throw error;
-        }
+        if (utc) _dateTime = _dateTime.setZone('UTC');
+        return _dateTime;
     }
 
     static makeFrom24h_That70sDateTime(
@@ -602,31 +598,27 @@ export class Meeting extends Realm.Object<Meeting> {
         weekday: string,
         utc?: boolean
     ): DateTime {
-        try {
-            let hour = Number.parseInt(time24h.split(':')[0]);
-            let minute = Number.parseInt(time24h.split(':')[1]);
-            // @ts-ignore
-            let day: any = Meeting.iso_weekday_2_70s_dow[weekday];
+        const hour = Number.parseInt(time24h.split(':')[0]);
+        const minute = Number.parseInt(time24h.split(':')[1]);
+        // @ts-ignore
+        const day: any = Meeting.iso_weekday_2_70s_dow[weekday];
 
-            let dateTime = DateTime.fromObject(
-                {
-                    hour,
-                    minute,
-                    second: 0,
-                    millisecond: 0,
-                },
-                { zone }
-            ).set({
-                year: 1970,
-                month: 1,
-                day,
-            });
+        let dateTime = DateTime.fromObject(
+            {
+                hour,
+                minute,
+                second: 0,
+                millisecond: 0,
+            },
+            { zone }
+        ).set({
+            year: 1970,
+            month: 1,
+            day,
+        });
 
-            if (utc) dateTime = dateTime.setZone('UTC');
-            return dateTime;
-        } catch (error) {
-            throw error;
-        }
+        if (utc) dateTime = dateTime.setZone('UTC');
+        return dateTime;
     }
 
     // Move this search into the appropriate specific weekday of 1/1/1970
@@ -640,7 +632,7 @@ export class Meeting extends Realm.Object<Meeting> {
             weekday !== SpecificDay.today ? weekday : DateTime.local().weekday;
 
         // midnight indicates start happens on previous day
-        const midnight = start.weekday != end.weekday;
+        const midnight = start.weekday !== end.weekday;
 
         // align weekday into 70's dow
         // @ts-ignore

@@ -1,8 +1,8 @@
-import { head, last } from 'lodash';
+import { last } from 'lodash';
 import { DateTime, Duration } from 'luxon';
 import { v4 as uuidv4 } from 'uuid';
-import { IUser } from './user.class';
 import { Meeting } from './meeting';
+import { IUser } from './user.class';
 export interface IAttendanceRecord {
     aid: string;
 
@@ -132,13 +132,13 @@ export class Attendance implements IAttendance {
 
     date: string = <any>null;
     start: number = DateTime.now().toMillis(); __start$: string = <any>null;                // server populated millis
-    end: number = 0; __end$: string = <any>null;                              // server populated millis
-    duration: number = 0; __duration$: string = <any>null;                    // server populated millis
+    end = 0; __end$: string = <any>null;                              // server populated millis
+    duration = 0; __duration$: string = <any>null;                    // server populated millis
     durationHHMM$: string = <any>null;
-    credit: number = 0; __credit$: string = <any>null;                        // server populated millis
+    credit = 0; __credit$: string = <any>null;                        // server populated millis
 
-    processed: number = 0; _processed$: string = <any>null;          // server populated millis
-    updated: number = 0; _updated$: string = <any>null;              // server populated millis
+    processed = 0; _processed$: string = <any>null;          // server populated millis
+    updated = 0; _updated$: string = <any>null;              // server populated millis
 
     // EXCLUDED!
     user: IUser = <any>null;
@@ -147,14 +147,10 @@ export class Attendance implements IAttendance {
 
     invalid = false;
 
-    // server side called constructor only!
-    constructor(attendance: any) {
-    }
-
     toObject() {
         // list properties that are static or computed or attached and
         // should not be serialized into the database with this document
-        const exclude: string[] = ['user', 'meeting', 'records', 'reentry'];
+        // const exclude: string[] = ['user', 'meeting', 'records', 'reentry'];
     }
 
     public update(meeting?: Meeting) {
@@ -205,31 +201,29 @@ export class Attendance implements IAttendance {
             if repaired throw this (doing this allows caller to differentiate between a valid this return or a repaired this throw)
             if ! rethrow original isValid error (so caller knows the failure reason (and can log it properly))
     */
-    private reentry = false;
     public async repair(): Promise<IAttendance> {
         this.sort();
+
         await this.isValid().catch(async error => { // throws diagnostic error message 
+            let repair: any = { ...last, ...{ ___status: 'MEETING_ACTIVE_FALSE', id: uuidv4() } };
             switch (error.message) {
                 case 'invalid MEETING_ACTIVE_TRUE':
                     // 
                     throw error;
-                    break;
                 case 'invalid MEETING_STATUS_INMEETING':
                     throw error;
-                    break;
                 case 'invalid MEETING_ACTIVE_FALSE':                // this is what repairs a power loss while in meeting   
-                    let _last = last(this.records);                 // get last record to use as template for missing MEETING_ACTIVE_FALSE
+                    // let _last = last(this.records);                 // get last record to use as template for missing MEETING_ACTIVE_FALSE
                     // getting last is valid due to sort() in above isValid()
-                    let repair: any = { ...last, ...{ ___status: 'MEETING_ACTIVE_FALSE', id: uuidv4() } };
+                    
                     repair = new AttendanceRecord(repair);
                     this.records.push(repair);                       // replace missing record
-                    let repaired = null;
+                    // let repaired = null;
                     // if (repaired = await this.isValid().catch(error => { throw error; })) throw repaired;
                     break;
                 case 'invalid record length':
                     throw error;
                 default:
-                    debugger;
                     throw error;
             }
         });

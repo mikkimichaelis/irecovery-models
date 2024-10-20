@@ -47,7 +47,9 @@ export const schema = {
             },
             "name": {
                 "default": "",
-                "type": "string"
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255
             },
             "meetings": {
                 "type": "array",

@@ -25,6 +25,7 @@ export const schema = {
         "version": 0,
         "description": "describes a schedule",
         "primaryKey": "id",
+        "indexes": [ "name", ["active", "authorized"] ],
         "properties": {
             "active": {
                 "default": true,

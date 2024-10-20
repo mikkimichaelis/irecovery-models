@@ -1,6 +1,5 @@
 import { last } from 'lodash';
 import { DateTime, Duration } from 'luxon';
-import { v4 as uuidv4 } from 'uuid';
 import { Meeting } from './meeting';
 import { IUser } from './user.class';
 export interface IAttendanceRecord {
@@ -205,7 +204,7 @@ export class Attendance implements IAttendance {
         this.sort();
 
         await this.isValid().catch(async error => { // throws diagnostic error message 
-            let repair: any = { ...last, ...{ ___status: 'MEETING_ACTIVE_FALSE', id: uuidv4() } };
+            let repair: any = { ...last, ...{ ___status: 'MEETING_ACTIVE_FALSE', id: null } };
             switch (error.message) {
                 case 'invalid MEETING_ACTIVE_TRUE':
                     // 

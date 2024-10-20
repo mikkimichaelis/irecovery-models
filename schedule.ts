@@ -1,22 +1,10 @@
-import Realm, { ObjectSchema } from 'realm';
-import { Meeting } from './meeting';
+// import Realm, { ObjectSchema } from 'realm';
+// import { Meeting } from './meeting';
+import { ObjectId } from 'bson';
 
-export class Schedule extends Realm.Object<Schedule> {
-    static schema: ObjectSchema = {
-        name: 'Schedule',
-        primaryKey: '_id',
-        properties: {
-            _id: { type: "objectId", default: () => new Realm.BSON.ObjectId() },
-            updated: 'int',
-            active: 'bool',
-            authorized: 'bool',
-            daily: 'bool',
-            name: 'string',
-            meetings: 'Meeting[]',
-        },
-    }
+export class Schedule {
 
-    _id: Realm.BSON.ObjectId = new Realm.BSON.ObjectId();
+    id: ObjectId = new ObjectId();
     
     updated: number = 0;
     active: boolean = true;
@@ -24,44 +12,44 @@ export class Schedule extends Realm.Object<Schedule> {
 
     daily: boolean = false;
     name: string = '';
-    meetings: Meeting[] = [];
+    // meetings: Meeting[] = [];
 
-    public static sortMeetingsByStartTime(meetings: Meeting[]) {
-        // return meetings.sort((a, b) => {
-        //     if (a.continuous) {
-        //         return b.continuous ? 0 : -1;
-        //     }
-        //     else if (b.continuous) return 1;
+    // public static sortMeetingsByStartTime(meetings: Meeting[]) {
+    //     // return meetings.sort((a, b) => {
+    //     //     if (a.continuous) {
+    //     //         return b.continuous ? 0 : -1;
+    //     //     }
+    //     //     else if (b.continuous) return 1;
 
-        //     if (a.startDateTime < b.startDateTime) return -1;
-        //     if (a.startDateTime > b.startDateTime) return 1;
+    //     //     if (a.startDateTime < b.startDateTime) return -1;
+    //     //     if (a.startDateTime > b.startDateTime) return 1;
 
-        //     return 0;   // a == b
-        // });
-    }
+    //     //     return 0;   // a == b
+    //     // });
+    // }
 
-    addMeetings(meetings: Meeting[]) {
-        // this.mids = this.mids.concat(meetings.map(m => m._id.toString()));
+    // addMeetings(meetings: Meeting[]) {
+    //     // this.mids = this.mids.concat(meetings.map(m => m._id.toString()));
 
-        // this.daily = false;
-        // while (meetings.length > 6) {
-        //     // try to extract meetings per DOW with the same name and time as a Daily Meeting
-        //     const weekdays = Meeting.weekdays.map(day => {
-        //         return meetings.find(sibling =>
-        //             sibling.time24h === meetings[0].time24h
-        //             && sibling.name === meetings[0].name
-        //             && sibling.dayOfWeek === day);
-        //     }).filter((sibling: any) => sibling);
+    //     // this.daily = false;
+    //     // while (meetings.length > 6) {
+    //     //     // try to extract meetings per DOW with the same name and time as a Daily Meeting
+    //     //     const weekdays = Meeting.weekdays.map(day => {
+    //     //         return meetings.find(sibling =>
+    //     //             sibling.time24h === meetings[0].time24h
+    //     //             && sibling.name === meetings[0].name
+    //     //             && sibling.dayOfWeek === day);
+    //     //     }).filter((sibling: any) => sibling);
 
-        //     // if we have 7 siblings at the same time, make this a daily schedule
-        //     if (weekdays.length === 7) {
-        //         this.daily = true;
-        //         meetings = meetings.filter(m => !weekdays.includes(m));
-        //     } else {
-        //         meetings = meetings.slice(1);
-        //     }
-        // }
-    }
+    //     //     // if we have 7 siblings at the same time, make this a daily schedule
+    //     //     if (weekdays.length === 7) {
+    //     //         this.daily = true;
+    //     //         meetings = meetings.filter(m => !weekdays.includes(m));
+    //     //     } else {
+    //     //         meetings = meetings.slice(1);
+    //     //     }
+    //     // }
+    // }
 }
 
 

@@ -1,9 +1,9 @@
 export const schema = {
-    user: {
+    device: {
         "$schema": "http://json-schema.org/draft-07/schema#",
-        "title": "user schema",
+        "title": "device schema",
         "version": 0,
-        "description": "describes a user",
+        "description": "describes a device",
         "primaryKey": "id",
         "type": "object",
         "properties": {
@@ -13,11 +13,61 @@ export const schema = {
                 "minLength": 12,
                 "maxLength": 12
             },
-            "name": {
-                "default": "",
+            "uniqueId": {           // getUniqueId()
+                "default": null,
                 "type": "string"
             },
-        }
+            "brand": {              // getBrand()
+                "default": null,
+                "type": "string"
+            },
+            "buildNumber": {        // getBuildNumber()
+                "default": null,
+                "type": "string"
+            },
+            "carrier": {            // getCarrier()
+                "default": null,
+                "type": "string"
+            },
+            "deviceName": {         // getDeviceName()
+                "default": null,
+                "type": "string"
+            },
+            "deviceId": {           // getDeviceId()
+                "default": null,
+                "type": "string"
+            },
+            "isDevice": {           // useIsEmulator()
+                "default": null,
+                "type": "boolean"
+            },
+            "macAddress": {         // getMacAddress()
+                "default": null,
+                "type": "string"
+            },
+            "platformApiLevel": {   // getApiLevel()
+                "default": null,
+                "type": "number"
+            },
+            "totalMemory": {        // getTotalMemory()
+                "default": null,
+                "type": "number"
+            },
+            "updated": {
+                "default": 0,
+                "type": "number",
+                "multipleOf": 1,
+                "minimum": 0,
+                "maximum": 9007199254740991
+            },
+            "created": {
+                "default": 0,
+                "type": "number",
+                "multipleOf": 1,
+                "minimum": 0,
+                "maximum": 9007199254740991
+            }
+        },
     },
     schedule: {
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -25,8 +75,8 @@ export const schema = {
         "version": 0,
         "description": "describes a schedule",
         "primaryKey": "id",
-        "indexes": [ "name", ["active", "authorized"] ],
-        "required": [ "id", "name", "active", "authorized" ],
+        "indexes": ["name", ["active", "authorized"]],
+        "required": ["id", "name", "active", "authorized"],
         "properties": {
             "active": {
                 "default": true,
@@ -74,8 +124,8 @@ export const schema = {
         "version": 0,
         "description": "describes a meeting",
         "primaryKey": "id",
-        "indexes": [ "startDateTime", "endDateTime", ["active", "authorized", "verified"] ],
-        "required": [ "id", "name", "startDateTime", "endDateTime", "active", "authorized", "verified" ],
+        "indexes": ["startDateTime", "endDateTime", ["active", "authorized", "verified"]],
+        "required": ["id", "name", "startDateTime", "endDateTime", "active", "authorized", "verified"],
         "type": "object",
         "properties": {
             "passwordEnc": {

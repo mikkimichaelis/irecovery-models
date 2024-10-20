@@ -1,5 +1,3 @@
-// import Realm, { ObjectSchema } from 'realm';
-// import { Meeting } from './meeting';
 import { ObjectId } from 'bson';
 
 export class Schedule {
